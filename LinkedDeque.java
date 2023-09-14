@@ -1,10 +1,12 @@
+import java.util.NoSuchElementException;
+
 /**
  * Your implementation of a LinkedDeque.
  *
- * @author YOUR NAME HERE
+ * @author Quang Nguyen
  * @version 1.0
- * @userid YOUR USER ID HERE (i.e. gburdell3)
- * @GTID YOUR GT ID HERE (i.e. 900000000)
+ * @userid qnguyen305
+ * @GTID 903110019
  *
  * Collaborators: LIST ALL COLLABORATORS YOU WORKED WITH HERE
  *
@@ -28,7 +30,21 @@ public class LinkedDeque<T> {
      * @throws java.lang.IllegalArgumentException if data is null
      */
     public void addFirst(T data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        }
 
+        LinkedNode<T> newNode = new LinkedNode<>(data);
+        if (this.size == 0) {
+            tail = newNode;
+            head = newNode;
+        } else {
+            this.head.setPrevious(newNode);
+            newNode.setNext(this.head);
+            this.head = newNode;
+        }
+
+        this.size++;
     }
 
     /**
@@ -40,7 +56,20 @@ public class LinkedDeque<T> {
      * @throws java.lang.IllegalArgumentException if data is null
      */
     public void addLast(T data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        }
 
+        LinkedNode<T> newNode = new LinkedNode<>(data);
+        if (this.size == 0) {
+            tail = newNode;
+            head = newNode;
+        } else {
+            this.tail.setNext(newNode);
+            newNode.setPrevious(this.tail);
+            this.tail = newNode;
+        }
+        this.size++;
     }
 
     /**
@@ -52,7 +81,15 @@ public class LinkedDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T removeFirst() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        T data = head.getData();
+        head = head.getNext();
+        head.setPrevious(null);
+        this.size--;
+        return data;
     }
 
     /**
@@ -64,7 +101,15 @@ public class LinkedDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T removeLast() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        T data = tail.getData();
+        tail = tail.getPrevious();
+        tail.setNext(null);
+        this.size--;
+        return data;
     }
 
     /**
@@ -76,7 +121,11 @@ public class LinkedDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T getFirst() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        return head.getData();
     }
 
     /**
@@ -88,7 +137,11 @@ public class LinkedDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T getLast() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        return tail.getData();
     }
 
     /**

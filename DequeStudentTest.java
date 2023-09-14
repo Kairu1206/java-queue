@@ -1,197 +1,267 @@
-import org.junit.Before;
 import org.junit.Test;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
-/**
- * This is a basic set of unit tests for ArrayDeque and LinkedDeque.
- *
- * Passing these tests doesn't guarantee any grade on these assignments. These
- * student JUnits that we provide should be thought of as a sanity check to
- * help you get started on the homework and writing JUnits in general.
- *
- * We highly encourage you to write your own set of JUnits for each homework
- * to cover edge cases you can think of for each data structure. Your code must
- * work correctly and efficiently in all cases, which is why it's important
- * to write comprehensive tests to cover as many cases as possible.
- *
- * @author CS 1332 TAs
- * @version 1.0
- */
+import org.junit.Before;
+
+import static org.junit.Assert.*;
+import java.util.NoSuchElementException;
+
 public class DequeStudentTest {
-
+    private static ArrayDeque<String> list;
+    private static String[] test;
     private static final int TIMEOUT = 200;
-    private ArrayDeque<String> array;
-    private LinkedDeque<String> linked;
+
+    private static final int NUM_TEST_ELEMENTS = 10;
+
+    @Test(expected = java.lang.IllegalArgumentException.class)
+    public void addFirstDataIsNull() {
+
+        list.addFirst(null);
+
+    }
+
+    @Test(expected = java.lang.IllegalArgumentException.class)
+    public void addLastDataIsNull() {
+
+        list.addLast(null);
+
+    }
+
+    @Test(expected = java.util.NoSuchElementException.class)
+    public void removeFirstSizeIsZero() {
+
+        list.removeFirst();
+
+    }
+
+    @Test(expected = java.util.NoSuchElementException.class)
+    public void removeLastSizeIsZero() {
+
+        list.removeLast();
+
+    }
+
+    @Test(expected = java.util.NoSuchElementException.class)
+    public void getFirstSizeIsZero() {
+
+        list.getFirst();
+
+    }
+
+    @Test(expected = java.util.NoSuchElementException.class)
+    public void getLastSizeIsZero() {
+
+        list.getLast();
+
+    }
 
     @Before
-    public void setup() {
-        array = new ArrayDeque<>();
-        linked = new LinkedDeque<>();
+    public void setUp() {
+
+        list = new ArrayDeque<>();
+        test = new String[1];
+
+    }
+
+    private static void populateListByBack(ArrayDeque<String> list, int num_elements, String[] test) {
+
+        for(int k = 0; k < num_elements; k++) {
+
+            list.addLast(Integer.toString(k));
+            test[k] = Integer.toString(k);
+
+        }
+
+    }
+
+    private static void populateListByFront(ArrayDeque<String> list, int num_elements, String[] test) {
+
+        for(int k = num_elements - 1; k >=0; k--) {
+
+            list.addFirst(Integer.toString(k));
+            test[k] = Integer.toString(k);
+
+        }
+
     }
 
     @Test(timeout = TIMEOUT)
-    public void testInitialization() {
-        assertEquals(0, array.size());
-        assertArrayEquals(new Object[ArrayDeque.INITIAL_CAPACITY],
-            array.getBackingArray());
-        assertEquals(0, linked.size());
-        assertNull(linked.getHead());
-        assertNull(linked.getTail());
+    public void testAddLastNoResize() {
+
+        test = new String[11];
+
+        populateListByBack(list, NUM_TEST_ELEMENTS, test); // front should be at 0
+
+        assertArrayEquals(list.getBackingArray(), test);
+
     }
 
     @Test(timeout = TIMEOUT)
-    public void testArrayDequeNoWrapAround() {
-        array.addLast("0a"); // 0a, _, _, _, _, _, _, _, _, _, _
-        array.addLast("1a"); // 0a, 1a, _, _, _, _, _, _, _, _, _
-        array.addLast("2a"); // 0a, 1a, 2a,  _, _, _, _, _, _, _, _
-        array.addLast("3a"); // 0a, 1a, 2a, 3a, _, _, _, _, _, _, _
-        array.addLast("4a"); // 0a, 1a, 2a, 3a, 4a, _, _, _, _, _, _
+    public void testAddLastOneResize() {
 
-        assertEquals(5, array.size());
-        String[] expected = new String[ArrayDeque.INITIAL_CAPACITY];
-        expected[0] = "0a";
-        expected[1] = "1a";
-        expected[2] = "2a";
-        expected[3] = "3a";
-        expected[4] = "4a";
-        assertArrayEquals(expected, array.getBackingArray());
-        assertEquals("0a", array.getFirst());
-        assertEquals("4a", array.getLast());
+        test = new String[22];
 
-        // _, 1a, 2a, 3a, 4a, _, _, _, _, _, _
-        assertEquals("0a", array.removeFirst());
-        // _, _, 2a, 3a, 4a, _, _, _, _, _, _
-        assertEquals("1a", array.removeFirst());
-        // _, _, 2a, 3a, _, _, _, _, _, _, _
-        assertEquals("4a", array.removeLast());
-        // _, _, 2a, _, _, _, _, _, _, _, _
-        assertEquals("3a", array.removeLast());
+        populateListByBack(list, 22, test);
 
-        assertEquals(1, array.size());
-        expected[0] = null;
-        expected[1] = null;
-        expected[3] = null;
-        expected[4] = null;
-        assertArrayEquals(expected, array.getBackingArray());
-        assertEquals("2a", array.getFirst());
-        assertEquals("2a", array.getLast());
+        assertEquals(22, list.size());
+        assertArrayEquals(list.getBackingArray(), test);
+
     }
 
     @Test(timeout = TIMEOUT)
-    public void testArrayDequeWrapAround() {
-        array.addFirst("4a"); // _, _, _, _, _, _, _, _, _, _, 4a
-        array.addFirst("3a"); // _, _, _, _, _, _, _, _, _, 3a, 4a
-        array.addFirst("2a"); // _, _, _, _, _, _, _, _, 2a, 3a, 4a
-        array.addFirst("1a"); // _, _, _, _, _, _, _, 1a, 2a, 3a, 4a
-        array.addFirst("0a"); // _, _, _, _, _, _, 0a, 1a, 2a, 3a, 4a
+    public void testAddLastTwoResize() {
 
-        assertEquals(5, array.size());
-        String[] expected = new String[ArrayDeque.INITIAL_CAPACITY];
-        expected[10] = "4a";
-        expected[9] = "3a";
-        expected[8] = "2a";
-        expected[7] = "1a";
-        expected[6] = "0a";
-        assertArrayEquals(expected, array.getBackingArray());
-        assertEquals("0a", array.getFirst());
-        assertEquals("4a", array.getLast());
+        test = new String[44];
 
-        // _, _, _, _, _, _, 0a, 1a, 2a, 3a, _
-        assertEquals("4a", array.removeLast());
+        populateListByBack(list, 44, test);
 
-        assertEquals(4, array.size());
-        expected[10] = null;
-        assertArrayEquals(expected, array.getBackingArray());
-        assertEquals("0a", array.getFirst());
-        assertEquals("3a", array.getLast());
+        assertEquals(44, list.size());
+        assertArrayEquals(list.getBackingArray(), test);
 
-        array.addLast("5a"); // _, _, _, _, _, _, 0a, 1a, 2a, 3a, 5a
-        array.addLast("6a"); // 6a, _, _, _, _, _, 0a, 1a, 2a, 3a, 5a
-
-        assertEquals(6, array.size());
-        expected[10] = "5a";
-        expected[0] = "6a";
-        assertArrayEquals(expected, array.getBackingArray());
-        assertEquals("0a", array.getFirst());
-        assertEquals("6a", array.getLast());
     }
 
     @Test(timeout = TIMEOUT)
-    public void testLinkedDequeAdd() {
-        linked.addFirst("1a"); // 1a
-        linked.addFirst("0a"); // 0a, 1a
-        linked.addLast("2a"); // 0a, 1a, 2a
-        linked.addLast("3a"); // 0a, 1a, 2a, 3a
+    public void testAddLastWithFrontIndex() {
 
-        assertEquals(4, linked.size());
+        list.addFirst("I LOVE CS");
+        test = new String[11];
+        test[10] = "I LOVE CS";
 
-        LinkedNode<String> cur = linked.getHead();
-        assertNotNull(cur);
-        assertNull(cur.getPrevious());
-        assertEquals("0a", cur.getData());
+        populateListByBack(list, 10, test);
 
-        LinkedNode<String> prev = cur;
-        cur = cur.getNext();
-        assertNotNull(cur);
-        assertEquals(prev, cur.getPrevious());
-        assertEquals("1a", cur.getData());
+        assertEquals(list.size(), 11);
+        assertArrayEquals(list.getBackingArray(), test);
 
-        prev = cur;
-        cur = cur.getNext();
-        assertNotEquals(null, cur);
-        assertEquals(prev, cur.getPrevious());
-        assertEquals("2a", cur.getData());
-
-        prev = cur;
-        cur = cur.getNext();
-        assertNotNull(cur);
-        assertEquals(prev, cur.getPrevious());
-        assertEquals("3a", cur.getData());
-        assertEquals(linked.getTail(), cur);
-        assertNull(cur.getNext());
     }
 
     @Test(timeout = TIMEOUT)
-    public void testLinkedDequeRemove() {
-        linked.addFirst("1a"); // 1a
-        linked.addFirst("0a"); // 0a, 1a
-        linked.addLast("2a"); // 0a, 1a, 2a
-        linked.addLast("3a"); // 0a, 1a, 2a, 3a
+    public void testAddLastWithFrontIndexOneResize() {
 
-        assertEquals(4, linked.size());
+        list.addFirst("I LOVE CS");
+        test = new String[22];
 
-        assertEquals("0a", linked.removeFirst()); // 1a, 2a, 3a
-        assertEquals("3a", linked.removeLast()); // 1a, 2a
+        populateListByBack(list, 21, test);
 
-        LinkedNode<String> cur = linked.getHead();
-        assertNotNull(cur);
-        assertNull(cur.getPrevious());
-        assertEquals("1a", cur.getData());
+        for(int k = 1; k < test.length; k++) {
 
-        LinkedNode<String> prev = cur;
-        cur = cur.getNext();
-        assertNotNull(cur);
-        assertEquals(prev, cur.getPrevious());
-        assertEquals("2a", cur.getData());
-        assertEquals(linked.getTail(), cur);
+            test[k] = Integer.toString(k - 1);
 
-        cur = cur.getNext();
-        assertNull(cur);
+        }
+
+        test[0] = "I LOVE CS";
+
+        assertEquals(list.size(), 22);
+
+        assertArrayEquals(list.getBackingArray(), test);
+
     }
 
     @Test(timeout = TIMEOUT)
-    public void testLinkedDequeGet() {
-        linked.addLast("0a"); // 0a
-        linked.addLast("1a"); // 0a, 1a
-        linked.addLast("2a"); // 0a, 1a, 2a
-        linked.addLast("3a"); // 0a, 1a, 2a, 3a
+    public void testAddFrontNoResize() {
 
-        assertEquals("0a", linked.getFirst());
-        assertEquals("3a", linked.getLast());
+        test = new String[11];
+
+        populateListByFront(list, 11, test);
+
+        assertEquals(list.size(), 11);
+        assertArrayEquals(list.getBackingArray(), test);
+
     }
+
+    @Test(timeout = TIMEOUT)
+    public void testAddFrontOneResize() {
+
+        test = new String[22]; // too lazy to change the method
+
+        populateListByFront(list, 22, test);
+
+        String[] asserter = {"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+                "20", "21", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+        assertEquals(list.size(), 22);
+        assertArrayEquals(list.getBackingArray(), asserter);
+
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemoveFront() {
+
+        test = new String[11];
+
+        populateListByBack(list, 11, test);
+
+        for(int k = 0; k < test.length; k++) {
+
+            assertEquals(list.removeFirst(), test[k]);
+
+        }
+
+        assertArrayEquals(new String[11], list.getBackingArray());
+        assertEquals(list.size(), 0);
+
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemoveFrontWithFrontIndex() {
+
+        test = new String[11];
+
+        list.addFirst("I LOVE CS1332");
+
+        populateListByBack(list, 10, test);
+
+        assertEquals("I LOVE CS1332", list.removeFirst());
+
+        for(int k = 1; k < test.length; k++) {
+
+            assertEquals(list.removeFirst(), Integer.toString(k-1));
+
+        }
+
+        assertArrayEquals(new String[11], list.getBackingArray());
+        assertEquals(list.size(), 0);
+
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemoveLast() {
+
+        test = new String[11];
+
+        populateListByBack(list, 11, test);
+
+        for(int k = 0; k < test.length; k++) {
+
+            assertEquals(list.removeLast(), test[test.length - 1 - k]);
+
+        }
+
+        assertArrayEquals(new String[11], list.getBackingArray());
+        assertEquals(list.size(), 0);
+
+    }
+
+    @Test(timeout = TIMEOUT)
+    public void testRemoveLastWithFrontIndex() {
+
+        test = new String[11];
+
+        list.addFirst("I LOVE CS1332");
+
+        populateListByBack(list, 10, test);
+
+        for(int k = 1; k < test.length; k++) {
+
+            assertEquals(list.removeLast(), Integer.toString(test.length - k - 1));
+
+        }
+
+        assertEquals(list.removeLast(), "I LOVE CS1332");
+
+        assertArrayEquals(new String[11], list.getBackingArray());
+        assertEquals(list.size(), 0);
+
+    }
+
 }

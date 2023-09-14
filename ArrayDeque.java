@@ -1,10 +1,12 @@
+import java.util.NoSuchElementException;
+
 /**
  * Your implementation of an ArrayDeque.
  *
- * @author YOUR NAME HERE
+ * @author Quang Nguyen
  * @version 1.0
- * @userid YOUR USER ID HERE (i.e. gburdell3)
- * @GTID YOUR GT ID HERE (i.e. 900000000)
+ * @userid qnguyen305
+ * @GTID 903110019
  *
  * Collaborators: LIST ALL COLLABORATORS YOU WORKED WITH HERE
  *
@@ -28,7 +30,9 @@ public class ArrayDeque<T> {
      * Constructs a new ArrayDeque.
      */
     public ArrayDeque() {
-
+        backingArray = (T[]) new Object[INITIAL_CAPACITY];
+        this.size = 0;
+        this.front = 0;
     }
 
     /**
@@ -46,7 +50,26 @@ public class ArrayDeque<T> {
      * @throws java.lang.IllegalArgumentException if data is null
      */
     public void addFirst(T data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        }
 
+        if (this.size == 0) {
+            backingArray[this.backingArray.length - 1] = data;
+            front = this.backingArray.length - 1;
+        } else if (this.size < this.backingArray.length) {
+            front = mod(front - 1, this.backingArray.length);
+            backingArray[front] = data;
+        } else {
+            T[] newArray = (T[]) new Object[this.backingArray.length * 2];
+            newArray[0] = data;
+            for (int i = 0; i < this.backingArray.length; i++) {
+                newArray[i + 1] = this.backingArray[mod(front + i, this.backingArray.length)];
+            }
+            backingArray = newArray;
+            front = 0;
+        }
+        this.size++;
     }
 
     /**
@@ -62,7 +85,25 @@ public class ArrayDeque<T> {
      * @throws java.lang.IllegalArgumentException if data is null
      */
     public void addLast(T data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        }
 
+        if (this.size == 0) {
+            backingArray[0] = data;
+        } else if (this.size < this.backingArray.length) {
+            this.backingArray[mod(front + (size), backingArray.length)] = data;
+        } else {
+            T[] newArray = (T[]) new Object[this.backingArray.length];
+            int index = 0;
+            for (int i = 0; i < this.backingArray.length; i++) {
+                newArray[i] = this.backingArray[mod(front + i, this.backingArray.length)];
+                index++;
+            }
+            backingArray = newArray;
+            backingArray[index] = data;
+        }
+        this.size++;
     }
 
     /**
@@ -83,7 +124,15 @@ public class ArrayDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T removeFirst() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        T data = backingArray[front];
+        backingArray[front] = null;
+        front = mod(front + 1, this.backingArray.length);
+        this.size--;
+        return data;
     }
 
     /**
@@ -103,7 +152,14 @@ public class ArrayDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T removeLast() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        T data = backingArray[mod(front + (size - 1), backingArray.length)];
+        backingArray[mod(front + (size - 1), backingArray.length)] = null;
+        this.size--;
+        return data;
     }
 
     /**
@@ -115,7 +171,11 @@ public class ArrayDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T getFirst() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        return backingArray[front];
     }
 
     /**
@@ -127,7 +187,11 @@ public class ArrayDeque<T> {
      * @throws java.util.NoSuchElementException if the deque is empty
      */
     public T getLast() {
+        if (this.size == 0) {
+            throw new NoSuchElementException("deque is empty");
+        }
 
+        return backingArray[mod(front + (size - 1), backingArray.length)];
     }
 
     /**
